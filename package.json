@@ -1,0 +1,46 @@
+{
+  "name": "skills-layer",
+  "version": "0.1.6",
+  "private": false,
+  "type": "module",
+  "description": "Open-source CLI and local agent integration layer for Skills Layer Cloud.",
+  "homepage": "https://skills-layer.com",
+  "keywords": [
+    "skills",
+    "mcp",
+    "cli",
+    "agents",
+    "codex",
+    "cloud",
+    "marketplace"
+  ],
+  "bin": {
+    "skills-layer": "bin/skills-layer.js"
+  },
+  "files": [
+    "bin/skills-layer.js",
+    "public/skills-layer-public.mjs",
+    "scripts/skills-layer.mjs",
+    "docs/assets/*.svg",
+    "tests/public-cli-package.test.mjs"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "typecheck": "node --check bin/skills-layer.js && node --check scripts/skills-layer.mjs && node --check public/skills-layer-public.mjs && node --check tests/public-cli-package.test.mjs",
+    "test": "node --test tests/public-cli-package.test.mjs",
+    "test:coverage": "node --test --experimental-test-coverage --test-coverage-include=**/tests/public-cli-package.test.mjs --test-coverage-lines=100 --test-coverage-functions=100 --test-coverage-branches=100 tests/public-cli-package.test.mjs"
+  },
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ankurdhoom/skills-layer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ankurdhoom/skills-layer/issues"
+  }
+}

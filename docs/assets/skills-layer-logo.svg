@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="260" viewBox="0 0 960 260" role="img" aria-labelledby="title desc">
+  <title id="title">Skills Layer logo</title>
+  <desc id="desc">A layered geometric mark beside the Skills Layer wordmark on a light canvas.</desc>
+  <defs>
+    <linearGradient id="slLogoTop" x1="18" x2="204" y1="48" y2="118" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#19C6A7"/>
+      <stop offset="1" stop-color="#6FE7C8"/>
+    </linearGradient>
+    <linearGradient id="slLogoMiddle" x1="12" x2="212" y1="94" y2="172" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5368F6"/>
+      <stop offset="1" stop-color="#30B8E8"/>
+    </linearGradient>
+    <linearGradient id="slLogoBottom" x1="18" x2="204" y1="148" y2="224" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F5B942"/>
+      <stop offset="1" stop-color="#F97361"/>
+    </linearGradient>
+    <filter id="slLogoShadow" x="-10%" y="-10%" width="120%" height="130%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="12" stdDeviation="13" flood-color="#101828" flood-opacity="0.16"/>
+    </filter>
+  </defs>
+  <rect width="960" height="260" rx="36" fill="#F8FAF7"/>
+  <g filter="url(#slLogoShadow)" transform="translate(52 22)">
+    <path d="M112 0 210 56 112 112 14 56Z" fill="url(#slLogoTop)"/>
+    <path d="M112 53 210 109 112 165 14 109Z" fill="url(#slLogoMiddle)"/>
+    <path d="M112 106 210 162 112 218 14 162Z" fill="url(#slLogoBottom)"/>
+    <path d="M112 0 210 56 112 112 14 56Z" fill="none" stroke="#0F172A" stroke-opacity="0.12" stroke-width="3"/>
+    <path d="M112 53 210 109 112 165 14 109Z" fill="none" stroke="#0F172A" stroke-opacity="0.12" stroke-width="3"/>
+    <path d="M112 106 210 162 112 218 14 162Z" fill="none" stroke="#0F172A" stroke-opacity="0.12" stroke-width="3"/>
+    <circle cx="112" cy="109" r="15" fill="#FFFFFF" fill-opacity="0.92"/>
+    <circle cx="112" cy="109" r="6" fill="#111827"/>
+  </g>
+  <g transform="translate(306 72)">
+    <text x="0" y="72" fill="#111827" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="68" font-weight="780" letter-spacing="0">Skills Layer</text>
+    <text x="4" y="116" fill="#475467" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="25" font-weight="560" letter-spacing="0">AI Agent first platform for Skills</text>
+  </g>
+</svg>

@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="640" viewBox="0 0 1600 640" role="img" aria-labelledby="title desc">
+  <title id="title">Skills Layer hero image</title>
+  <desc id="desc">Skills Layer brand artwork showing a layered skill bundle connected to REST, MCP, and CLI surfaces.</desc>
+  <defs>
+    <linearGradient id="heroBg" x1="0" x2="1600" y1="0" y2="640" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8FAF7"/>
+      <stop offset="0.48" stop-color="#F2F7F6"/>
+      <stop offset="1" stop-color="#F8F4EB"/>
+    </linearGradient>
+    <radialGradient id="heroGlowA" cx="0" cy="0" r="1" gradientTransform="matrix(360 0 0 260 1090 130)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6FE7C8" stop-opacity="0.72"/>
+      <stop offset="1" stop-color="#6FE7C8" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="heroGlowB" cx="0" cy="0" r="1" gradientTransform="matrix(300 0 0 220 1340 470)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F5B942" stop-opacity="0.48"/>
+      <stop offset="1" stop-color="#F5B942" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="markTop" x1="18" x2="204" y1="48" y2="118" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#19C6A7"/>
+      <stop offset="1" stop-color="#6FE7C8"/>
+    </linearGradient>
+    <linearGradient id="markMiddle" x1="12" x2="212" y1="94" y2="172" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5368F6"/>
+      <stop offset="1" stop-color="#30B8E8"/>
+    </linearGradient>
+    <linearGradient id="markBottom" x1="18" x2="204" y1="148" y2="224" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F5B942"/>
+      <stop offset="1" stop-color="#F97361"/>
+    </linearGradient>
+    <linearGradient id="layerOne" x1="772" x2="1328" y1="92" y2="316" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#19C6A7"/>
+      <stop offset="1" stop-color="#6FE7C8"/>
+    </linearGradient>
+    <linearGradient id="layerTwo" x1="772" x2="1328" y1="176" y2="400" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5368F6"/>
+      <stop offset="1" stop-color="#30B8E8"/>
+    </linearGradient>
+    <linearGradient id="layerThree" x1="772" x2="1328" y1="260" y2="484" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F5B942"/>
+      <stop offset="1" stop-color="#F97361"/>
+    </linearGradient>
+    <filter id="softShadow" x="-15%" y="-15%" width="130%" height="140%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#101828" flood-opacity="0.16"/>
+    </filter>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M48 0H0V48" fill="none" stroke="#101828" stroke-opacity="0.055" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1600" height="640" rx="44" fill="url(#heroBg)"/>
+  <rect width="1600" height="640" rx="44" fill="url(#grid)"/>
+  <rect width="1600" height="640" rx="44" fill="url(#heroGlowA)"/>
+  <rect width="1600" height="640" rx="44" fill="url(#heroGlowB)"/>
+
+  <g transform="translate(112 106)">
+    <g filter="url(#softShadow)" transform="scale(0.9)">
+      <path d="M112 0 210 56 112 112 14 56Z" fill="url(#markTop)"/>
+      <path d="M112 53 210 109 112 165 14 109Z" fill="url(#markMiddle)"/>
+      <path d="M112 106 210 162 112 218 14 162Z" fill="url(#markBottom)"/>
+      <path d="M112 0 210 56 112 112 14 56Z" fill="none" stroke="#0F172A" stroke-opacity="0.12" stroke-width="3"/>
+      <path d="M112 53 210 109 112 165 14 109Z" fill="none" stroke="#0F172A" stroke-opacity="0.12" stroke-width="3"/>
+      <path d="M112 106 210 162 112 218 14 162Z" fill="none" stroke="#0F172A" stroke-opacity="0.12" stroke-width="3"/>
+      <circle cx="112" cy="109" r="15" fill="#FFFFFF" fill-opacity="0.92"/>
+      <circle cx="112" cy="109" r="6" fill="#111827"/>
+    </g>
+    <text x="238" y="78" fill="#111827" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="72" font-weight="790" letter-spacing="0">Skills Layer</text>
+    <text x="242" y="128" fill="#475467" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="27" font-weight="560" letter-spacing="0">AI Agent first platform for Skills</text>
+    <text x="242" y="185" fill="#344054" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="24" font-weight="520" letter-spacing="0">Governed publishing for</text>
+    <text x="242" y="222" fill="#344054" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="24" font-weight="520" letter-spacing="0">Markdown-first skill bundles.</text>
+
+    <g transform="translate(242 276)" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="20" font-weight="700">
+      <rect x="0" y="0" width="92" height="44" rx="22" fill="#111827"/>
+      <text x="46" y="29" text-anchor="middle" fill="#FFFFFF">REST</text>
+      <rect x="112" y="0" width="86" height="44" rx="22" fill="#E8F8F5" stroke="#19C6A7" stroke-width="2"/>
+      <text x="155" y="29" text-anchor="middle" fill="#027A63">MCP</text>
+      <rect x="218" y="0" width="74" height="44" rx="22" fill="#EEF1FF" stroke="#5368F6" stroke-width="2"/>
+      <text x="255" y="29" text-anchor="middle" fill="#3445D8">CLI</text>
+      <rect x="312" y="0" width="150" height="44" rx="22" fill="#FFF5DF" stroke="#F5B942" stroke-width="2"/>
+      <text x="387" y="29" text-anchor="middle" fill="#9A5B00">well-known</text>
+    </g>
+  </g>
+
+  <g transform="translate(814 96)">
+    <path d="M560 78C606 98 638 141 638 191C638 264 568 324 482 324C459 324 437 320 418 313" fill="none" stroke="#111827" stroke-opacity="0.18" stroke-width="3"/>
+    <path d="M154 354C102 332 66 287 66 235C66 160 140 100 232 100C256 100 279 104 300 111" fill="none" stroke="#111827" stroke-opacity="0.18" stroke-width="3"/>
+    <g filter="url(#softShadow)">
+      <path d="M286 0 560 140 286 280 12 140Z" fill="url(#layerOne)"/>
+      <path d="M286 84 560 224 286 364 12 224Z" fill="url(#layerTwo)"/>
+      <path d="M286 168 560 308 286 448 12 308Z" fill="url(#layerThree)"/>
+      <path d="M286 0 560 140 286 280 12 140Z" fill="none" stroke="#111827" stroke-opacity="0.12" stroke-width="4"/>
+      <path d="M286 84 560 224 286 364 12 224Z" fill="none" stroke="#111827" stroke-opacity="0.12" stroke-width="4"/>
+      <path d="M286 168 560 308 286 448 12 308Z" fill="none" stroke="#111827" stroke-opacity="0.12" stroke-width="4"/>
+    </g>
+    <g font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" text-anchor="middle" letter-spacing="0">
+      <text x="286" y="148" fill="#063D35" font-size="35" font-weight="800">SKILL.md</text>
+      <text x="286" y="233" fill="#FFFFFF" font-size="31" font-weight="780">validation</text>
+      <text x="286" y="318" fill="#5F3600" font-size="31" font-weight="780">install plans</text>
+    </g>
+
+    <g font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="19" font-weight="750" letter-spacing="0">
+      <g transform="translate(0 24)">
+        <rect x="0" y="0" width="162" height="48" rx="24" fill="#FFFFFF" stroke="#D0D5DD"/>
+        <circle cx="30" cy="24" r="8" fill="#19C6A7"/>
+        <text x="54" y="31" fill="#344054">Catalog</text>
+      </g>
+      <g transform="translate(512 46)">
+        <rect x="0" y="0" width="172" height="48" rx="24" fill="#FFFFFF" stroke="#D0D5DD"/>
+        <circle cx="30" cy="24" r="8" fill="#5368F6"/>
+        <text x="54" y="31" fill="#344054">Trust review</text>
+      </g>
+      <g transform="translate(36 394)">
+        <rect x="0" y="0" width="156" height="48" rx="24" fill="#FFFFFF" stroke="#D0D5DD"/>
+        <circle cx="30" cy="24" r="8" fill="#F97361"/>
+        <text x="54" y="31" fill="#344054">Exports</text>
+      </g>
+      <g transform="translate(506 372)">
+        <rect x="0" y="0" width="154" height="48" rx="24" fill="#FFFFFF" stroke="#D0D5DD"/>
+        <circle cx="30" cy="24" r="8" fill="#F5B942"/>
+        <text x="54" y="31" fill="#344054">Agents</text>
+      </g>
+    </g>
+  </g>
+</svg>
