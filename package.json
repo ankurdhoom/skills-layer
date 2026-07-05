@@ -1,6 +1,6 @@
 {
   "name": "skills-layer",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "private": false,
   "type": "module",
   "description": "Open-source CLI and local agent integration layer for Skills Layer Cloud.",
@@ -18,6 +18,11 @@
     "skills-layer": "bin/skills-layer.js"
   },
   "files": [
+    "CODE_OF_CONDUCT.md",
+    "CONTRIBUTING.md",
+    "SECURITY.md",
+    ".github/dependabot.yml",
+    ".github/workflows/*.yml",
     "bin/skills-layer.js",
     "public/skills-layer-public.mjs",
     "scripts/skills-layer.mjs",

@@ -1,7 +1,7 @@
 import { execFile } from "node:child_process";
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, readFile } from "node:fs/promises";
+import { mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -72,6 +72,13 @@ function parseJsonError(result) {
   return JSON.parse(result.stderr);
 }
 
+function jsonResponse(body, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { "content-type": "application/json" }
+  });
+}
+
 test("public package metadata keeps the npm tree narrow and non-lifecycle", async () => {
   const packageJson = JSON.parse(await readFile(packageUrl, "utf8"));
   assert.equal(packageJson.name, "skills-layer");
@@ -87,6 +94,11 @@ test("public package metadata keeps the npm tree narrow and non-lifecycle", asyn
   });
   assert.deepEqual(packageJson.bugs, { url: "https://github.com/ankurdhoom/skills-layer/issues" });
   assert.deepEqual(packageJson.files, [
+    "CODE_OF_CONDUCT.md",
+    "CONTRIBUTING.md",
+    "SECURITY.md",
+    ".github/dependabot.yml",
+    ".github/workflows/*.yml",
     "bin/skills-layer.js",
     "public/skills-layer-public.mjs",
     "scripts/skills-layer.mjs",
@@ -196,6 +208,89 @@ test("public runtime persists backend preference without network access", async 
   const statusPayload = parseJsonOutput(status);
   assert.equal(statusPayload.data.selectedBaseUrl, "https://staging.findfigg.co.uk");
   assert.equal(statusPayload.data.loggedIn, false);
+});
+
+test("public runtime posts buyer eval summary envelopes with reviews", async () => {
+  const home = await makeHome();
+  const cwd = await mkdtemp(join(tmpdir(), "skills-layer-cli-package-work-"));
+  const summaryPath = join(cwd, "buyer-eval-summary.json");
+  const artifactDigest = `sha256:${"a".repeat(64)}`;
+  await writeFile(summaryPath, JSON.stringify({
+    schemaVersion: "skills-layer.eval.summary.v1",
+    status: "passed",
+    skillSlug: "project-planner",
+    version: "1.0.0",
+    artifactDigest,
+    evalPackDigest: `sha256:${"b".repeat(64)}`,
+    generatedAt: "2026-07-03T00:00:00.000Z",
+    counts: {
+      cases: 1,
+      assertions: 2,
+      passed: 2,
+      failed: 0,
+      skipped: 0
+    },
+    redaction: {
+      mode: "content_free",
+      rawContentIncluded: false
+    }
+  }), "utf8");
+
+  const fetch = async (input, init = {}) => {
+    const url = String(input);
+    if (url === "https://api.skills-layer.local/api/v1/me") {
+      assert.equal(init.headers.authorization, "Bearer package-test-key");
+      return jsonResponse({
+        userId: "user_package",
+        email: "package@example.com",
+        role: "buyer",
+        roles: ["buyer"]
+      });
+    }
+    if (url === "https://api.skills-layer.local/api/v1/capabilities") {
+      assert.equal(init.headers.authorization, "Bearer package-test-key");
+      return jsonResponse({ edition: "saas", capabilities: ["marketplace"] });
+    }
+    if (url === "https://api.skills-layer.local/api/v1/me/library/project-planner/review") {
+      assert.equal(init.method, "POST");
+      assert.equal(init.headers.authorization, "Bearer package-test-key");
+      const body = JSON.parse(String(init.body));
+      assert.deepEqual(body, {
+        rating: 5,
+        feedback: "Useful",
+        evalSummary: {
+          schemaVersion: "skills-layer.eval.summary.v1",
+          status: "passed",
+          skillSlug: "project-planner",
+          version: "1.0.0",
+          artifactDigest,
+          evalPackDigest: `sha256:${"b".repeat(64)}`,
+          generatedAt: "2026-07-03T00:00:00.000Z",
+          counts: {
+            cases: 1,
+            assertions: 2,
+            passed: 2,
+            failed: 0,
+            skipped: 0
+          },
+          redaction: {
+            mode: "content_free",
+            rawContentIncluded: false
+          }
+        }
+      });
+      return jsonResponse({ status: "reviewed", reviewId: "review_package", buyerEval: { status: "recorded" } });
+    }
+    throw new Error(`Unexpected package contract request: ${url}`);
+  };
+
+  const login = await runPublic(["login", "--api-key", "package-test-key", "--base-url", "https://api.skills-layer.local", "--no-mcp", "--json"], { home, cwd, fetch });
+  assert.equal(login.exitCode, 0);
+  assert.equal(parseJsonOutput(login).data.email, "package@example.com");
+
+  const review = await runPublic(["add-review", "project-planner", "--rating", "5", "--feedback", "Useful", "--eval-summary", summaryPath, "--json"], { home, cwd, fetch });
+  assert.equal(review.exitCode, 0);
+  assert.equal(parseJsonOutput(review).data.buyerEval.status, "recorded");
 });
 
 test("public runtime fails closed for internal and login-required commands", async () => {
