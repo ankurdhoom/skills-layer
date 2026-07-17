@@ -94,16 +94,11 @@ test("public package metadata keeps the npm tree narrow and non-lifecycle", asyn
   });
   assert.deepEqual(packageJson.bugs, { url: "https://github.com/ankurdhoom/skills-layer/issues" });
   assert.deepEqual(packageJson.files, [
-    "CODE_OF_CONDUCT.md",
-    "CONTRIBUTING.md",
     "SECURITY.md",
-    ".github/dependabot.yml",
-    ".github/workflows/*.yml",
     "bin/skills-layer.js",
     "public/skills-layer-public.mjs",
     "scripts/skills-layer.mjs",
-    "docs/assets/*.svg",
-    "tests/public-cli-package.test.mjs"
+    "docs/assets/*.svg"
   ]);
   assert.deepEqual(Object.keys(packageJson.scripts).sort(), ["test", "test:coverage", "typecheck"]);
   for (const lifecycleScript of ["preinstall", "install", "postinstall", "prepare", "prepack", "postpack", "prepublishOnly"]) {

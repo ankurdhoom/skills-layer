@@ -22,7 +22,7 @@ This repository contains the public CLI/local integration surface only. The host
 
 Use it to discover, validate, install, export, and manage agent-ready skill bundles from a terminal. By default, backend-backed commands talk to Skills Layer Cloud. Use another endpoint only when Skills Layer explicitly provides one for your account or environment.
 
-Skills Layer is a headless, agent-first platform for Markdown-first skill bundles centered on `SKILL.md`. It manages catalog metadata, validation, trust reports, installation plans, entitlements, exports, workspace deployment, and local agent materialization. It does not host a separate runtime for every user's skill; your agent, IDE, CLI, or backend remains the execution environment.
+Skills Layer is a headless, agent-first platform for Markdown-first skill bundles centered on `SKILL.md`. It manages catalog metadata, validation, trust reports, installation plans, entitlements, exports, workspace approvals, and local agent materialization. It does not host a separate runtime for every user's skill; your agent, IDE, CLI, or backend remains the execution environment.
 
 <p align="center">
   <img src="https://unpkg.com/skills-layer/docs/assets/skills-layer-flow.svg" alt="Skills Layer flow from SKILL.md bundle to validation, catalog, CLI, MCP, API, and local agent installation" width="96%">
@@ -126,7 +126,7 @@ Use only endpoints published or explicitly provided by Skills Layer.
 ## Safety Model
 
 - Inspect trust reports before installing skills into sensitive projects.
-- Use `--dry-run` before mutating installs, submissions, workspace deployment, listing visibility, or ownership state.
+- Use `--dry-run` before mutating installs, submissions, workspace approvals, listing visibility, or ownership state.
 - Use `guardian check` before letting a skill drive shell, network, file, secret, browser, device, API, generated-code, or model-context actions.
 - Keep API keys out of visible command arguments. Login flows use saved sessions, masked prompts, secure headers, or environment-provided secrets.
 
