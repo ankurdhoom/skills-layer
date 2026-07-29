@@ -32,6 +32,7 @@ function packageEnv(home) {
   const env = {
     ...process.env,
     HOME: home,
+    XDG_CONFIG_HOME: join(home, ".config"),
     SKILLS_LAYER_NO_BANNER: "1"
   };
   delete env.SKILLS_LAYER_API_KEY;
@@ -279,7 +280,7 @@ test("public runtime persists backend preference without network access", async 
   assert.equal(update.exitCode, 0);
   assert.equal(parseJsonOutput(update).data.selectedBaseUrl, "https://staging.findfigg.co.uk");
 
-  const preference = JSON.parse(await readFile(join(home, ".skills-layer", "backend-preference.json"), "utf8"));
+  const preference = JSON.parse(await readFile(join(home, ".config", "skills-layer", "backend-preference.json"), "utf8"));
   assert.equal(preference.preferredBaseUrl, "https://staging.findfigg.co.uk");
 
   const status = await runPublic(["backend", "status", "--json"], { home });
