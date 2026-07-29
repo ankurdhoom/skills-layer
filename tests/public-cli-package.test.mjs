@@ -12,6 +12,7 @@ const readmeUrl = new URL("../README.md", import.meta.url);
 const licenseUrl = new URL("../LICENSE", import.meta.url);
 const wrapperUrl = new URL("../scripts/skills-layer.mjs", import.meta.url);
 const securityUrl = new URL("../SECURITY.md", import.meta.url);
+const thirdPartyNoticesUrl = new URL("../THIRD_PARTY_NOTICES.md", import.meta.url);
 const contributingUrl = new URL("../CONTRIBUTING.md", import.meta.url);
 const codeOfConductUrl = new URL("../CODE_OF_CONDUCT.md", import.meta.url);
 const dependabotUrl = new URL("../.github/dependabot.yml", import.meta.url);
@@ -44,8 +45,9 @@ async function runPublic(args, options = {}) {
   return await runtime.executePublicCli(args, {
     env: packageEnv(options.home ?? await makeHome()),
     cwd: options.cwd,
-    stdoutIsTty: false,
-    fetch: options.fetch ?? (async () => { throw new Error("Unexpected network call from package contract test."); })
+    stdoutIsTty: options.stdoutIsTty ?? false,
+    fetch: options.fetch ?? (async () => { throw new Error("Unexpected network call from package contract test."); }),
+    ...(options.promptText ? { promptText: options.promptText } : {})
   });
 }
 
@@ -95,12 +97,17 @@ test("public package metadata keeps the npm tree narrow and non-lifecycle", asyn
   assert.deepEqual(packageJson.bugs, { url: "https://github.com/ankurdhoom/skills-layer/issues" });
   assert.deepEqual(packageJson.files, [
     "SECURITY.md",
+    "THIRD_PARTY_NOTICES.md",
     "bin/skills-layer.js",
     "public/skills-layer-public.mjs",
     "scripts/skills-layer.mjs",
     "docs/assets/*.svg"
   ]);
   assert.deepEqual(Object.keys(packageJson.scripts).sort(), ["test", "test:coverage", "typecheck"]);
+  const thirdPartyNotices = await readFile(thirdPartyNoticesUrl, "utf8");
+  for (const packageName of ["@inquirer/select", "chalk", "ora", "yaml"]) {
+    assert.ok(thirdPartyNotices.includes(`## ${packageName} `));
+  }
   for (const lifecycleScript of ["preinstall", "install", "postinstall", "prepare", "prepack", "postpack", "prepublishOnly"]) {
     assert.equal(packageJson.scripts[lifecycleScript], undefined);
   }
@@ -170,6 +177,11 @@ test("public bin wrapper and runtime expose deterministic package smoke commands
   assert.equal(binVersion.stderr, "");
   assert.equal(binVersion.stdout.trim(), expectedVersionLine);
 
+  const earlyJsonFailure = await runBin(["whoami", "--output-format", "json", "--ui", "invalid"]);
+  assert.equal(earlyJsonFailure.exitCode, 1);
+  assert.equal(earlyJsonFailure.stdout, "");
+  assert.equal(JSON.parse(earlyJsonFailure.stderr).reasonCode, "invalid_global_option");
+
   const version = await runtime.executePublicCli(["--version"]);
   assert.equal(version.exitCode, 0);
   assert.equal(version.stdout.trim(), expectedVersionLine);
@@ -187,6 +199,78 @@ test("public bin wrapper and runtime expose deterministic package smoke commands
   assert.equal(fullHelp.exitCode, 0);
   assert.match(fullHelp.stdout, /Start here:/u);
   assert.match(fullHelp.stdout, /skills-layer help full/u);
+});
+
+test("public package renders the complete recorded help audit", async () => {
+  const runtime = await loadRuntime();
+  const home = await makeHome();
+  const checks = [
+    ["--help"],
+    ...runtime.PUBLIC_CLI_HELP_GOAL_ROUTES,
+    ...runtime.PUBLIC_CLI_HELP_BRANCH_ROUTES.map((route) => [...route, "--help"])
+  ];
+  assert.equal(checks.length, runtime.PUBLIC_CLI_HELP_AUDIT_CHECK_COUNT);
+  for (const route of checks) {
+    const result = await runPublic(route, { home });
+    assert.equal(result.exitCode, 0, route.join(" "));
+    assert.equal(result.stderr, "", route.join(" "));
+    assert.ok(result.stdout.trim().length > 0, route.join(" "));
+    assert.doesNotMatch(result.stdout, /(?:ReferenceError|TypeError|SyntaxError|node:internal)/u, route.join(" "));
+    if (route.at(-1) === "--help" && route[0] !== "--help") {
+      const commandPath = route.slice(0, -1).join(" ");
+      assert.match(result.stdout, /Usage:/u, commandPath);
+      assert.ok(result.stdout.includes(`skills-layer ${commandPath}`), commandPath);
+      assert.doesNotMatch(result.stdout, /Run `skills-layer --help` for public CLI usage\./u, commandPath);
+    }
+  }
+  for (const routeName of runtime.PUBLIC_CLI_HELP_PATH_NAMES) {
+    const result = await runPublic([...routeName.split(" "), "--help"], { home });
+    assert.equal(result.exitCode, 0, routeName);
+    assert.match(result.stdout, /Usage:/u, routeName);
+    assert.ok(result.stdout.startsWith(`Skills Layer ${routeName}`) || result.stdout.includes(`skills-layer ${routeName}`), routeName);
+    assert.doesNotMatch(result.stdout, /Run `skills-layer --help` for public CLI usage\.|Run this supported Skills Layer command\./u, routeName);
+  }
+});
+
+test("public package keeps email login state-neutral, cancellable, and delivery-aware", async () => {
+  const email = "continue@example.com";
+  const requests = [];
+  const sentFetch = async (input, init = {}) => {
+    requests.push({ url: String(input), body: init.body ? JSON.parse(String(init.body)) : null });
+    return jsonResponse({ status: "verification_sent", email, emailDelivery: "sent" });
+  };
+  const jsonStart = await runPublic(["login", "--method", "email", "--email", email, "--no-mcp", "--json"], { fetch: sentFetch });
+  assert.equal(jsonStart.exitCode, 0);
+  const jsonData = parseJsonOutput(jsonStart).data;
+  assert.equal(jsonData.status, "verification_sent");
+  assert.equal(jsonData.emailDelivery, "sent");
+  assert.equal(jsonData.nextAction, "auth.verify");
+  assert.equal(jsonData.nextCommand, `skills-layer auth verify --email ${email} --code <code> --json`);
+  assert.deepEqual(requests, [{ url: "https://api.skills-layer.com/api/v1/register", body: { email } }]);
+
+  const cancelled = await runPublic(["login", "--method", "email", "--email", email, "--no-mcp"], {
+    fetch: sentFetch,
+    stdoutIsTty: true,
+    promptText: async () => ""
+  });
+  assert.equal(cancelled.exitCode, 0);
+  assert.match(cancelled.stdout, /No code was entered, so nothing[\s\S]*else was changed/u);
+
+  const deferred = await runPublic(["login", "--method", "email", "--email", email, "--no-mcp"], { fetch: sentFetch });
+  assert.equal(deferred.exitCode, 0);
+  assert.match(deferred.stdout, /auth verify/u);
+
+  const failed = await runPublic(["login", "--method", "email", "--email", email, "--no-mcp"], {
+    fetch: async () => jsonResponse({ status: "verification_sent", email, emailDelivery: "failed" })
+  });
+  assert.equal(failed.exitCode, 1);
+  assert.match(failed.stderr, /email code could not be delivered/u);
+
+  const legacy = await runPublic(["login", "--method", "email", "--email", email, "--no-mcp", "--json"], {
+    fetch: async () => jsonResponse({ status: "already_registered" })
+  });
+  assert.equal(legacy.exitCode, 1);
+  assert.match(legacy.stderr, /backend did not prepare an email sign-in code/u);
 });
 
 test("public runtime persists backend preference without network access", async () => {

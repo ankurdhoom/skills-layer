@@ -1,6 +1,6 @@
 {
   "name": "skills-layer",
-  "version": "0.1.9",
+  "version": "0.2.0",
   "private": false,
   "type": "module",
   "description": "Open-source CLI and local agent integration layer for Skills Layer Cloud.",
@@ -19,6 +19,7 @@
   },
   "files": [
     "SECURITY.md",
+    "THIRD_PARTY_NOTICES.md",
     "bin/skills-layer.js",
     "public/skills-layer-public.mjs",
     "scripts/skills-layer.mjs",
