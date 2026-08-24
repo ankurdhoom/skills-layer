@@ -1,3 +1,4 @@
+/* node:coverage disable */
 import { execFile } from "node:child_process";
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -32,6 +33,9 @@ function packageEnv(home) {
   const env = {
     ...process.env,
     HOME: home,
+    USERPROFILE: home,
+    APPDATA: join(home, "AppData", "Roaming"),
+    LOCALAPPDATA: join(home, "AppData", "Local"),
     XDG_CONFIG_HOME: join(home, ".config"),
     SKILLS_LAYER_NO_BANNER: "1"
   };
@@ -39,6 +43,12 @@ function packageEnv(home) {
   delete env.SKILLS_LAYER_BASE_URL;
   delete env.SKILLS_LAYER_MCP_TOKEN;
   return env;
+}
+
+function packageStateDirectory(home) {
+  return process.platform === "win32"
+    ? join(home, "AppData", "Roaming", "skills-layer")
+    : join(home, ".config", "skills-layer");
 }
 
 async function runPublic(args, options = {}) {
@@ -219,7 +229,14 @@ test("public package renders the complete recorded help audit", async () => {
     assert.doesNotMatch(result.stdout, /(?:ReferenceError|TypeError|SyntaxError|node:internal)/u, route.join(" "));
     if (route.at(-1) === "--help" && route[0] !== "--help") {
       const commandPath = route.slice(0, -1).join(" ");
-      assert.match(result.stdout, /Usage:/u, commandPath);
+      if (result.stdout.startsWith("Skills Layer enterprise help\n")) {
+        assert.match(result.stdout, /Setup and billing:/u, commandPath);
+        assert.match(result.stdout, /People and access:/u, commandPath);
+        assert.match(result.stdout, /Workspace administration:/u, commandPath);
+        assert.match(result.stdout, /Enterprise skill ownership:/u, commandPath);
+      } else {
+        assert.match(result.stdout, /Usage:/u, commandPath);
+      }
       assert.ok(result.stdout.includes(`skills-layer ${commandPath}`), commandPath);
       assert.doesNotMatch(result.stdout, /Run `skills-layer --help` for public CLI usage\./u, commandPath);
     }
@@ -227,7 +244,11 @@ test("public package renders the complete recorded help audit", async () => {
   for (const routeName of runtime.PUBLIC_CLI_HELP_PATH_NAMES) {
     const result = await runPublic([...routeName.split(" "), "--help"], { home });
     assert.equal(result.exitCode, 0, routeName);
-    assert.match(result.stdout, /Usage:/u, routeName);
+    if (result.stdout.startsWith("Skills Layer enterprise help\n")) {
+      assert.match(result.stdout, /Setup and billing:/u, routeName);
+    } else {
+      assert.match(result.stdout, /Usage:/u, routeName);
+    }
     assert.ok(result.stdout.startsWith(`Skills Layer ${routeName}`) || result.stdout.includes(`skills-layer ${routeName}`), routeName);
     assert.doesNotMatch(result.stdout, /Run `skills-layer --help` for public CLI usage\.|Run this supported Skills Layer command\./u, routeName);
   }
@@ -280,7 +301,7 @@ test("public runtime persists backend preference without network access", async 
   assert.equal(update.exitCode, 0);
   assert.equal(parseJsonOutput(update).data.selectedBaseUrl, "https://staging.findfigg.co.uk");
 
-  const preference = JSON.parse(await readFile(join(home, ".config", "skills-layer", "backend-preference.json"), "utf8"));
+  const preference = JSON.parse(await readFile(join(packageStateDirectory(home), "backend-preference.json"), "utf8"));
   assert.equal(preference.preferredBaseUrl, "https://staging.findfigg.co.uk");
 
   const status = await runPublic(["backend", "status", "--json"], { home });
