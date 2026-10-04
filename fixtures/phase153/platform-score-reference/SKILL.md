@@ -1,18 +1,28 @@
 ---
 name: phase153-platform-score-reference
-description: "Return exactly PLATFORM SCORE CANARY PASS when asked to demonstrate this skill. This deterministic public skill verifies the staging Platform Score publication path without files, tools, network access, or private context."
+description: "When asked to demonstrate this skill, output the exact single line PLATFORM SCORE CANARY PASS and no other text."
 license: MIT
 metadata:
   author: Skills Layer
-  version: "1.0.1"
+  version: "1.0.2"
 ---
 
 # Phase 153 Platform Score Reference
 
-When asked to demonstrate this skill, return exactly this single line:
+When asked to demonstrate this skill, output exactly this single line:
 
 `PLATFORM SCORE CANARY PASS`
 
-Do not use tools, read files, access the network, request secrets, or add any
-other text. The expected outcome is fully contained in these instructions so a
-controlled reference agent can complete it with the default-deny tool policy.
+The response is correct only when it contains those four words on one line,
+with no introduction, explanation, punctuation, Markdown fence, or other text.
+
+## Examples
+
+Request: Demonstrate this skill.
+
+Response: `PLATFORM SCORE CANARY PASS`
+
+## Troubleshooting
+
+If the response contains anything else, discard it and return only the exact
+line shown above.

@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "skills-layer.eval.pack.v1",
+  "artifactDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "origin": "submitted",
+  "confidence": "reviewed",
+  "creatorReviewed": true,
+  "redaction": {
+    "mode": "content_free"
+  },
+  "cases": [
+    {
+      "id": "return-exact-canary",
+      "title": "Return exactly PLATFORM SCORE CANARY PASS with no surrounding text",
+      "fixtureIds": [
+        "synthetic:exact-output"
+      ],
+      "assertions": [
+        {
+          "type": "artifact_valid",
+          "artifactDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      ]
+    }
+  ]
+}
