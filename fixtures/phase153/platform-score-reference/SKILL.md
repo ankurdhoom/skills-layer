@@ -4,7 +4,7 @@ description: "Return exactly PLATFORM SCORE CANARY PASS when asked to demonstrat
 license: MIT
 metadata:
   author: Skills Layer
-  version: "1.0"
+  version: "1.0.1"
 ---
 
 # Phase 153 Platform Score Reference
