@@ -4,7 +4,7 @@ description: "When asked to demonstrate this skill, output the exact single line
 license: MIT
 metadata:
   author: Skills Layer
-  version: "1.0.26"
+  version: "1.0.27"
 ---
 
 # Phase 153 Platform Score Reference
