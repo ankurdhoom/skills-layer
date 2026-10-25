@@ -2,7 +2,7 @@
 import { execFile } from "node:child_process";
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -62,10 +62,11 @@ async function runPublic(args, options = {}) {
   });
 }
 
-async function runBin(args) {
+async function runBin(args, options = {}) {
   const home = await makeHome();
+  const env = { ...packageEnv(home), ...(options.env ?? {}) };
   return await new Promise((resolve) => {
-    execFile(process.execPath, [binPath, ...args], { env: packageEnv(home) }, (error, stdout, stderr) => {
+    execFile(process.execPath, [binPath, ...args], { env }, (error, stdout, stderr) => {
       resolve({
         exitCode: typeof error?.code === "number" ? error.code : 0,
         stdout,
@@ -210,6 +211,66 @@ test("public bin wrapper and runtime expose deterministic package smoke commands
   assert.equal(fullHelp.exitCode, 0);
   assert.match(fullHelp.stdout, /Start here:/u);
   assert.match(fullHelp.stdout, /skills-layer help full/u);
+
+  const screenReaderHelp = await runBin(["--screen-reader", "--help"], {
+    env: { SKILLS_LAYER_NO_BANNER: "0", SKILLS_LAYER_BANNER: "always" }
+  });
+  assert.equal(screenReaderHelp.exitCode, 0);
+  assert.ok(screenReaderHelp.stdout.startsWith("Skills-Layer\n\nSkills Layer CLI"));
+  assert.doesNotMatch(screenReaderHelp.stdout, /[█#]{4}/u);
+
+  const asciiHelp = await runBin(["--ascii", "--color", "never", "--help"], {
+    env: { SKILLS_LAYER_NO_BANNER: "0", SKILLS_LAYER_BANNER: "always" }
+  });
+  assert.equal(asciiHelp.exitCode, 0);
+  assert.ok(asciiHelp.stdout.startsWith("#### #  #"));
+  assert.match(asciiHelp.stdout, /-----/u);
+  assert.doesNotMatch(asciiHelp.stdout, /\u001B\[/u);
+
+  const colouredHelp = await runBin(["--color", "always", "--help"], {
+    env: { SKILLS_LAYER_NO_BANNER: "0", SKILLS_LAYER_BANNER: "always", TERM: "xterm-256color", NO_UNICODE: "0" }
+  });
+  assert.equal(colouredHelp.exitCode, 0);
+  assert.match(colouredHelp.stdout, /^\u001B\[/u);
+  assert.match(colouredHelp.stdout, /\u001B\[38;5;\d+m/u);
+  const plainColouredHelp = colouredHelp.stdout.replace(/\u001B\[[0-9;]*m/gu, "");
+  assert.ok(plainColouredHelp.startsWith("████ █  █"));
+  assert.match(plainColouredHelp, /\n█    █ █   ██  █    █    █          █    █  █/u);
+  assert.match(plainColouredHelp, /━━━━━/u);
+  assert.equal(plainColouredHelp.split("\n\n", 1)[0].split("\n").length, 5);
+  assert.match(plainColouredHelp, /\n\nSkills Layer CLI/u);
+  assert.match(plainColouredHelp, /Skills Layer is an agnostic trust and intelligence layer for reusable AI skills\./u);
+
+  const trueColourHelp = await runBin(["--color", "always", "--help"], {
+    env: { SKILLS_LAYER_NO_BANNER: "0", SKILLS_LAYER_BANNER: "always", COLORTERM: "truecolor", TERM: "xterm-256color", NO_UNICODE: "0" }
+  });
+  assert.equal(trueColourHelp.exitCode, 0);
+  assert.match(trueColourHelp.stdout, /\u001B\[38;2;16;185;129m/u);
+
+  const appleTerminalHelp = await runBin(["--color", "always", "--help"], {
+    env: { SKILLS_LAYER_NO_BANNER: "0", SKILLS_LAYER_BANNER: "always", TERM: "xterm-256color", TERM_PROGRAM: "Apple_Terminal", NO_UNICODE: "0" }
+  });
+  assert.equal(appleTerminalHelp.exitCode, 0);
+  assert.match(appleTerminalHelp.stdout, /\u001B\[(?:3[0-7]|9[0-7])m/u);
+  assert.doesNotMatch(appleTerminalHelp.stdout, /\u001B\[38;(?:2|5);/u);
+
+  const interactiveCapabilities = { stdinIsTty: true, stdoutIsTty: true, stderrIsTty: true };
+  const interactiveEnvironment = { HOME: await makeHome(), TERM: "xterm-256color", TERM_PROGRAM: "Apple_Terminal" };
+  const interactiveArgs = ["--color", "always", "--help"];
+  const interactiveHelp = await runtime.executePublicCli(interactiveArgs, {
+    env: interactiveEnvironment,
+    ...interactiveCapabilities
+  });
+  let interactiveStdout = "";
+  await runtime.writeCliResult(interactiveHelp, {
+    mode: runtime.prepareCliPresentation(interactiveArgs, interactiveEnvironment, interactiveCapabilities).mode,
+    writeStdout: (value) => { interactiveStdout += value; },
+    writeStderr: () => undefined,
+    sleep: async () => undefined,
+    shouldSkip: () => true
+  });
+  assert.match(interactiveStdout, /^\u001B\[/u);
+  assert.match(interactiveStdout, /\u001B\[(?:3[0-7]|9[0-7])m/u);
 });
 
 test("public package renders the complete recorded help audit", async () => {
@@ -297,7 +358,7 @@ test("public package keeps email login state-neutral, cancellable, and delivery-
 
 test("public runtime persists backend preference without network access", async () => {
   const home = await makeHome();
-  const update = await runPublic(["backend", "--base-url", "https://staging.findfigg.co.uk", "--json"], { home });
+  const update = await runPublic(["backend", "--base-url", "https://staging.findfigg.co.uk", "--skip-probe", "--json"], { home });
   assert.equal(update.exitCode, 0);
   assert.equal(parseJsonOutput(update).data.selectedBaseUrl, "https://staging.findfigg.co.uk");
 
@@ -392,6 +453,93 @@ test("public runtime posts buyer eval summary envelopes with reviews", async () 
   const review = await runPublic(["add-review", "project-planner", "--rating", "5", "--feedback", "Useful", "--eval-summary", summaryPath, "--json"], { home, cwd, fetch });
   assert.equal(review.exitCode, 0);
   assert.equal(parseJsonOutput(review).data.buyerEval.status, "recorded");
+});
+
+test("public runtime keeps raw detail full-only and unmanaged authorization fail-closed", async () => {
+  const home = await makeHome();
+  const stateDirectory = packageStateDirectory(home);
+  await mkdir(stateDirectory, { recursive: true });
+  await writeFile(join(stateDirectory, "config.json"), JSON.stringify({
+    version: 1,
+    baseUrl: "https://api.skills-layer.local",
+    apiKey: "package-test-key",
+    workingModeId: "personal",
+    workingModeType: "personal"
+  }), "utf8");
+  await writeFile(join(stateDirectory, "installs.json"), JSON.stringify({
+    version: 2,
+    installs: Object.fromEntries(Array.from({ length: 8 }, (_, index) => [`skill-${index}`, {
+      skillSlug: `skill-${index}`,
+      version: "1.0.0",
+      materializations: {
+        project: {
+          materializationId: "project",
+          scope: "project",
+          agent: "codex",
+          targetAgents: ["codex"],
+          savedAt: `2026-09-25T12:00:0${index}.000Z`,
+          storageKey: `private/install/${index}`,
+          materializedWrites: [{ path: `skill-${index}/SKILL.md`, content: "private detail" }]
+        }
+      }
+    }]))
+  }), "utf8");
+
+  const conciseInstalls = parseJsonOutput(await runPublic(["installed", "--json", "--detail", "concise"], { home })).data;
+  const standardInstalls = parseJsonOutput(await runPublic(["installed", "--json"], { home })).data;
+  const fullInstalls = parseJsonOutput(await runPublic(["installed", "--json", "--detail", "full"], { home })).data;
+  assert.deepEqual([conciseInstalls.resultCount, conciseInstalls.returnedResultCount, conciseInstalls.omittedResultCount], [8, 3, 5]);
+  assert.deepEqual([standardInstalls.resultCount, standardInstalls.returnedResultCount, standardInstalls.omittedResultCount], [8, 5, 3]);
+  assert.ok(standardInstalls.results.every((result) => typeof result.skillSlug === "string" && result.omittedCount === undefined));
+  assert.equal(conciseInstalls.results[0].savedAt, undefined);
+  assert.equal(standardInstalls.results[0].savedAt, "2026-09-25T12:00:00.000Z");
+  assert.equal(standardInstalls.results[0].storageKey, undefined);
+  assert.equal(fullInstalls.results.length, 8);
+  assert.equal(fullInstalls.results[0].storageKey, "private/install/0");
+
+  const source = await mkdtemp(join(tmpdir(), "skills-layer-cli-package-validation-"));
+  const rawBody = `# Examples\n\n${"raw-body ".repeat(80)}\n\n# Troubleshooting\n\nRecover safely.`;
+  const licenceText = `Custom licence\n\n${"raw-licence ".repeat(80)}`;
+  await writeFile(join(source, "SKILL.md"), `---\nname: package-detail\ndescription: Package detail contract.\nlicense: LicenseRef-Package-Test\n---\n\n${rawBody}`, "utf8");
+  await writeFile(join(source, "LICENSE"), licenceText, "utf8");
+  const validationFetch = async () => jsonResponse({
+    status: "ok",
+    valid: false,
+    parsedSkill: {
+      frontmatter: { name: "package-detail", description: "Package detail contract." },
+      rawFrontmatter: "name: package-detail\ndescription: Package detail contract.",
+      body: rawBody
+    },
+    issues: Array.from({ length: 7 }, (_, index) => ({ severity: "warning", code: `issue-${index}`, message: `Issue ${index}` })),
+    stats: { fileCount: 2, bodyWordCount: 90, hasReferences: false }
+  });
+  const conciseValidation = await runPublic(["validate", source, "--json", "--detail", "concise"], { home, fetch: validationFetch });
+  const standardValidation = await runPublic(["validate", source, "--json"], { home, fetch: validationFetch });
+  const fullValidation = await runPublic(["validate", source, "--json", "--detail", "full"], { home, fetch: validationFetch });
+  for (const result of [conciseValidation, standardValidation, fullValidation]) assert.equal(result.exitCode, 1);
+  for (const projected of [conciseValidation.stderr, standardValidation.stderr]) {
+    assert.doesNotMatch(projected, /raw-body raw-body raw-body/u);
+    assert.doesNotMatch(projected, /raw-licence raw-licence raw-licence/u);
+    assert.equal(projected.includes("\"rawFrontmatter\""), false);
+    assert.equal(projected.includes("\"rawContent\""), true);
+  }
+  assert.equal(parseJsonError(conciseValidation).data.issues.length, 3);
+  assert.equal(parseJsonError(standardValidation).data.issues.length, 5);
+  assert.match(fullValidation.stderr, /raw-body raw-body raw-body/u);
+  assert.match(fullValidation.stderr, /raw-licence raw-licence raw-licence/u);
+  assert.equal(fullValidation.stderr.includes("\"rawFrontmatter\""), true);
+
+  const unmanagedPath = join(source, "unmanaged");
+  await mkdir(unmanagedPath, { recursive: true });
+  await writeFile(join(unmanagedPath, "SKILL.md"), "---\nname: unmanaged\n---\n# Unmanaged\n", "utf8");
+  for (const option of [["--unmanaged-policy", "allow"], ["--allow-unmanaged-once"]]) {
+    const guardian = await runPublic(["guardian", "check", "unmanaged", "--path", unmanagedPath, ...option, "--action-json", "{\"type\":\"file_read\",\"path\":\"README.md\"}", "--json"], { home });
+    assert.equal(guardian.exitCode, 1);
+    const failure = parseJsonError(guardian);
+    assert.equal(failure.status, "blocked");
+    assert.equal(failure.reasonCode, "guardian_unmanaged_atomic_execution_required");
+    assert.equal(failure.nextAction, "install");
+  }
 });
 
 test("public runtime fails closed for internal and login-required commands", async () => {
