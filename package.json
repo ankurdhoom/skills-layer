@@ -1,6 +1,6 @@
 {
   "name": "skills-layer",
-  "version": "0.2.27",
+  "version": "0.2.28",
   "private": false,
   "type": "module",
   "description": "Open-source CLI and local agent integration layer for Skills Layer Cloud.",
