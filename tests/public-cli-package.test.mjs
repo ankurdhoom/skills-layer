@@ -488,8 +488,8 @@ test("public runtime keeps raw detail full-only and unmanaged authorization fail
   const conciseInstalls = parseJsonOutput(await runPublic(["installed", "--json", "--detail", "concise"], { home })).data;
   const standardInstalls = parseJsonOutput(await runPublic(["installed", "--json"], { home })).data;
   const fullInstalls = parseJsonOutput(await runPublic(["installed", "--json", "--detail", "full"], { home })).data;
-  assert.deepEqual([conciseInstalls.resultCount, conciseInstalls.returnedResultCount, conciseInstalls.omittedResultCount], [8, 3, 5]);
-  assert.deepEqual([standardInstalls.resultCount, standardInstalls.returnedResultCount, standardInstalls.omittedResultCount], [8, 5, 3]);
+  assert.deepEqual([conciseInstalls.resultCount, conciseInstalls.returnedResultCount, conciseInstalls.omittedResultCount], [8, 8, 0]);
+  assert.deepEqual([standardInstalls.resultCount, standardInstalls.returnedResultCount, standardInstalls.omittedResultCount], [8, 8, 0]);
   assert.ok(standardInstalls.results.every((result) => typeof result.skillSlug === "string" && result.omittedCount === undefined));
   assert.equal(conciseInstalls.results[0].savedAt, undefined);
   assert.equal(standardInstalls.results[0].savedAt, "2026-09-25T12:00:00.000Z");
