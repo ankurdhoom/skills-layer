@@ -82,7 +82,7 @@ function parseJsonOutput(result) {
 }
 
 function parseJsonError(result) {
-  assert.equal(result.stdout, "");
+  assert.equal(result.stdout, result.stderr);
   return JSON.parse(result.stderr);
 }
 
@@ -191,7 +191,7 @@ test("public bin wrapper and runtime expose deterministic package smoke commands
 
   const earlyJsonFailure = await runBin(["whoami", "--output-format", "json", "--ui", "invalid"]);
   assert.equal(earlyJsonFailure.exitCode, 1);
-  assert.equal(earlyJsonFailure.stdout, "");
+  assert.equal(earlyJsonFailure.stdout, earlyJsonFailure.stderr);
   assert.equal(JSON.parse(earlyJsonFailure.stderr).reasonCode, "invalid_global_option");
 
   const version = await runtime.executePublicCli(["--version"]);
