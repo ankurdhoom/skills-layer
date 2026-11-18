@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { createCliProgress, createRevealSkipController, executePublicCli, prepareCliPresentation, writeCliResult } from "../public/skills-layer-public.mjs";
+import { createCliProgress, createRevealSkipController, executePublicCli, prepareCliPresentation, resolveCliCommandName, writeCliResult } from "../public/skills-layer-public.mjs";
 
 const args = process.argv.slice(2);
 const capabilities = {
@@ -19,7 +19,7 @@ try {
   presentation = { args, mode: { kind, color: false, motion: false, interactive: false, unicode: true, screenReader: false, classic: true, detail: "standard" } };
 }
 const human = presentation.mode.kind === "human-interactive" || presentation.mode.kind === "human-static";
-const commandName = presentation.args?.find((argument) => !argument.startsWith("-")) ?? "skills-layer";
+const commandName = resolveCliCommandName(presentation.args ?? args);
 const lightweight = args.length === 0 || args.includes("--help") || args.includes("-h") || args.includes("--version") || args.includes("-v") || commandName === "help" || commandName === "version";
 const progress = lightweight
   ? { info() {}, pause() {}, resume() {}, finish() {} }
