@@ -47,7 +47,8 @@ try {
     writeStderr: (value) => process.stderr.write(value),
     sleep: (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds)),
     shouldSkip: revealSkip.shouldSkip,
-    width: process.stdout.columns
+    width: process.stdout.columns,
+    sharedTerminal: capabilities.stdoutIsTty && capabilities.stderrIsTty
   });
 } finally {
   revealSkip.dispose();
