@@ -191,8 +191,9 @@ test("public bin wrapper and runtime expose deterministic package smoke commands
 
   const earlyJsonFailure = await runBin(["whoami", "--output-format", "json", "--ui", "invalid"]);
   assert.equal(earlyJsonFailure.exitCode, 1);
-  assert.equal(earlyJsonFailure.stdout, earlyJsonFailure.stderr);
-  assert.equal(JSON.parse(earlyJsonFailure.stderr).reasonCode, "invalid_global_option");
+  // GD-R2-08 as revised in round 9: the --json failure document once on stdout, and one plain line on stderr.
+  assert.equal(earlyJsonFailure.stderr, "error: invalid_global_option: Invalid global option --ui.\n");
+  assert.equal(JSON.parse(earlyJsonFailure.stdout).reasonCode, "invalid_global_option");
 
   const version = await runtime.executePublicCli(["--version"]);
   assert.equal(version.exitCode, 0);
