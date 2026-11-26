@@ -1,6 +1,6 @@
 {
   "name": "skills-layer",
-  "version": "0.2.49",
+  "version": "0.2.50",
   "private": false,
   "type": "module",
   "description": "Open-source CLI and local agent integration layer for Skills Layer Cloud.",
@@ -22,6 +22,7 @@
     "THIRD_PARTY_NOTICES.md",
     "bin/skills-layer.js",
     "public/skills-layer-public.mjs",
+    "public/chunks/*.mjs",
     "scripts/skills-layer.mjs",
     "docs/assets/*.svg"
   ],
@@ -29,7 +30,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "typecheck": "node --check bin/skills-layer.js && node --check scripts/skills-layer.mjs && node --check public/skills-layer-public.mjs && node --check tests/public-cli-package.test.mjs",
+    "typecheck": "node --check bin/skills-layer.js && node --check scripts/skills-layer.mjs && node --check public/skills-layer-public.mjs && node -e \"const fs = require('node:fs'); const cp = require('node:child_process'); for (const file of fs.readdirSync('public/chunks')) cp.execFileSync(process.execPath, ['--check', 'public/chunks/' + file], { stdio: 'inherit' });\" && node --check tests/public-cli-package.test.mjs",
     "test": "node --test tests/public-cli-package.test.mjs",
     "test:coverage": "node --test --experimental-test-coverage --test-coverage-include=**/tests/public-cli-package.test.mjs --test-coverage-lines=100 --test-coverage-functions=100 --test-coverage-branches=100 tests/public-cli-package.test.mjs"
   },

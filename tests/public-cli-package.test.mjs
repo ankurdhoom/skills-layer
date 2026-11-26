@@ -112,6 +112,7 @@ test("public package metadata keeps the npm tree narrow and non-lifecycle", asyn
     "THIRD_PARTY_NOTICES.md",
     "bin/skills-layer.js",
     "public/skills-layer-public.mjs",
+    "public/chunks/*.mjs",
     "scripts/skills-layer.mjs",
     "docs/assets/*.svg"
   ]);
@@ -275,7 +276,8 @@ test("public bin wrapper and runtime expose deterministic package smoke commands
 });
 
 test("public package renders the complete recorded help audit", async () => {
-  const runtime = await loadRuntime();
+  // The help routes load on demand (code-split entry, ASK-5); they are not needed to start the CLI.
+  const runtime = await (await loadRuntime()).loadPublicCliHelpRoutes();
   const home = await makeHome();
   const checks = [
     ["--help"],
