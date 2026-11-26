@@ -58,7 +58,8 @@ async function runPublic(args, options = {}) {
     cwd: options.cwd,
     stdoutIsTty: options.stdoutIsTty ?? false,
     fetch: options.fetch ?? (async () => { throw new Error("Unexpected network call from package contract test."); }),
-    ...(options.promptText ? { promptText: options.promptText } : {})
+    ...(options.promptText ? { promptText: options.promptText } : {}),
+    ...(options.promptSecret ? { promptSecret: options.promptSecret } : {})
   });
 }
 
@@ -334,10 +335,11 @@ test("public package keeps email login state-neutral, cancellable, and delivery-
   assert.equal(jsonData.nextCommand, `skills-layer auth verify --email ${email} --code <code> --json`);
   assert.deepEqual(requests, [{ url: "https://api.skills-layer.com/api/v1/register", body: { email } }]);
 
+  // ID-R10-05: the email code is read through the masked prompt.
   const cancelled = await runPublic(["login", "--method", "email", "--email", email, "--no-mcp"], {
     fetch: sentFetch,
     stdoutIsTty: true,
-    promptText: async () => ""
+    promptSecret: async () => ""
   });
   assert.equal(cancelled.exitCode, 0);
   assert.match(cancelled.stdout, /No code was entered, so nothing[\s\S]*else was changed/u);
